@@ -1,0 +1,130 @@
+-- phpMyAdmin SQL Dump
+-- Version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Oct 02, 2024 at 01:15 PM
+-- Server version: 10.5.15-MariaDB
+-- PHP Version: 8.2.4
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+-- Database: perpustakaan_modern
+-- --------------------------------------------------------
+
+-- Table structure for table members
+CREATE TABLE members (
+  member_id INT(11) NOT NULL AUTO_INCREMENT,
+  fullname VARCHAR(150) NOT NULL,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(15) NOT NULL,
+  email VARCHAR(100) NOT NULL,
+  address TEXT NOT NULL,
+  membership_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  role ENUM('anggota', 'admin') NOT NULL DEFAULT 'anggota',
+  PRIMARY KEY (member_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+-- Table structure for table books
+CREATE TABLE books (
+  book_id INT(11) NOT NULL AUTO_INCREMENT,
+  title VARCHAR(255) NOT NULL,
+  author VARCHAR(150) NOT NULL,
+  publisher VARCHAR(150) NOT NULL,
+  publish_year YEAR(4) NOT NULL,
+  genre VARCHAR(100) NOT NULL,
+  language VARCHAR(50) NOT NULL DEFAULT 'Indonesian',
+  total_pages INT(5) NOT NULL,
+  stock INT(11) NOT NULL DEFAULT 0,
+  location_shelf VARCHAR(50) NOT NULL,
+  PRIMARY KEY (book_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+-- Table structure for table loans
+CREATE TABLE loans (
+  loan_id INT(11) NOT NULL AUTO_INCREMENT,
+  member_id INT(11) NOT NULL,
+  book_id INT(11) NOT NULL,
+  loan_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  due_date DATE NOT NULL,
+  return_date DATE DEFAULT NULL,
+  loan_status ENUM('borrowed', 'returned', 'overdue') NOT NULL DEFAULT 'borrowed',
+  fines DECIMAL(10, 2) DEFAULT 0.00,
+  PRIMARY KEY (loan_id),
+  FOREIGN KEY (member_id) REFERENCES members(member_id) ON DELETE CASCADE,
+  FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+-- Table structure for table staff
+CREATE TABLE staff (
+  staff_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(150) NOT NULL,
+  position VARCHAR(100) NOT NULL,
+  phone VARCHAR(15) NOT NULL,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  hire_date DATE NOT NULL,
+  salary DECIMAL(10, 2) NOT NULL,
+  PRIMARY KEY (staff_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+-- Table structure for table categories
+CREATE TABLE categories (
+  category_id INT(11) NOT NULL AUTO_INCREMENT,
+  category_name VARCHAR(100) NOT NULL,
+  description TEXT NOT NULL,
+  PRIMARY KEY (category_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+-- Table structure for table book_categories
+CREATE TABLE book_categories (
+  book_id INT(11) NOT NULL,
+  category_id INT(11) NOT NULL,
+  PRIMARY KEY (book_id, category_id),
+  FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE,
+  FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Indexes for dumped tables
+
+-- Indexes for table members
+ALTER TABLE members
+  ADD UNIQUE KEY (username);
+
+-- Indexes for table books
+ALTER TABLE books
+  ADD INDEX (author),
+  ADD INDEX (title);
+
+-- Indexes for table loans
+ALTER TABLE loans
+  ADD INDEX (loan_date),
+  ADD INDEX (due_date),
+  ADD INDEX (return_date);
+
+-- Indexes for table staff
+ALTER TABLE staff
+  ADD UNIQUE KEY (email);
+
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
